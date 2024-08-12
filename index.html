@@ -134,9 +134,11 @@
 		</div>
 
 		<div id="fh5co-sayings">
-		  <ul id="facebook-posts">
-		    <!-- Facebook posts will be dynamically inserted here -->
-		  </ul>
+		  <div id="facebook-posts">
+		    <div class="fb-post" data-href="" data-width="500" data-show-text="true"></div>
+		    <div class="fb-post" data-href="" data-width="500" data-show-text="true"></div>
+		    <div class="fb-post" data-href="" data-width="500" data-show-text="true"></div>
+		  </div>
 		</div>
 
 		<div id="fh5co-featured" data-section="features">
@@ -648,41 +650,26 @@
 				.then(data => {
 					console.log('Facebook API Response:', data);
 					const posts = data.data;
-					const postsContainer = document.getElementById('facebook-posts');
-					postsContainer.innerHTML = ''; 
-
+					const postContainers = document.querySelectorAll('#facebook-posts .fb-post');
+					
 					let postCount = 0;
-
-					function processPost(index) {
-						if (index >= posts.length || postCount >= 3) return; // Stop if all posts are processed or limit reached
-
-						const post = posts[index];
-
-						// Check if the post is an event
+					for (let i = 0; i < posts.length && postCount < 3; i++) {
+						const post = posts[i];
 						if (post.story && post.story.includes('created an event')) {
 							console.log('Skipping event post:', post);
-							processPost(index + 1); // Skip event posts and process the next one
-							return;
+							continue;
 						}
-
-						const postId = post.id.split('_')[1]; // Extract the post ID
-						console.log('Creating fb-post for post:', postId);
-						const postItem = document.createElement('li');
-						postItem.innerHTML = `
-							<div class="fb-post" data-href="https://www.facebook.com/${pageId}/posts/${postId}" data-width="500"></div>
-						`;
-						postsContainer.appendChild(postItem);
-						console.log('Appended post:', postItem.innerHTML);
+						
+						const postId = post.id.split('_')[1];
+						const postUrl = `https://www.facebook.com/${pageId}/posts/${postId}`;
+						postContainers[postCount].setAttribute('data-href', postUrl);
 						postCount++;
-
-						// Re-parse the XFBML to render the post
-						FB.XFBML.parse(postItem, function() {
-							console.log('Post rendered:', postId);
-							processPost(index + 1); // Process the next post after the current one is rendered
-						});
 					}
 
-					processPost(0); // Start processing posts from the first one
+					// Parse all posts at once
+					FB.XFBML.parse(document.getElementById('facebook-posts'), function() {
+						console.log('All posts rendered');
+					});
 				})
 				.catch(error => console.error('Error fetching Facebook posts:', error));
 		}
