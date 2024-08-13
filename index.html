@@ -68,12 +68,22 @@
 	<script src="js/respond.min.js"></script>
 	<![endif]-->
 
-	<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v11.0"></script>
+
 	
 
 
 	</head>
 	<body>
+		<script>
+			window.fbAsyncInit = function() {
+			  FB.init({
+				appId            : '1020011486259158',
+				xfbml            : true,
+				version          : 'v20.0'
+			  });
+			};
+		  </script>
+		  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 
 	<div id="fh5co-container">
 		<div id="fh5co-home" class="js-fullheight" data-section="home">
@@ -639,7 +649,7 @@
 	<script>
 		function fetchFacebookPosts() {
 			console.log('Fetching Facebook posts');
-			const accessToken = 'EAAOfse5OJ9YBO5WhieeHfySYXPzV0hc9qsxi7rZBoix4xAQPUNrgFhi219g7xrcxHvhbBez9wHJZCpd5dJEYuJ3SJFG0D1vqZB1rgGhaJZBJIitPVat3jGprIQ2ZCd288WpHyl34IKA546UMB0wZBR7KBLktVnuZBBI6r2oIrRmEho1LmelK9YMZBKb0XNlwAASlNruG22yKDgmabcaorusZC';
+			const accessToken = 'EAAOfse5OJ9YBOyMU12SnrT3VJUDLqfuA3X7aRbEQD5GaZAFEybZBZBwD8YTaRlZAZCQTQg1eiEwOUTZBvQ9TUdyMDScmbhWIgx3JU4Y3vNR2m5F5WN3d8Cg1O4HtmW8NGahEPF42Xrl3xisxkR2ZCKZBP1D8iYjU4irzdRP6TRPghsj6Ss4RfL8unjaJEa6TGXEXg28r6jZAVy9FF76jSzVxN';
 			const pageId = '201011636427507';
 			const url = `https://graph.facebook.com/${pageId}/posts?access_token=${accessToken}&limit=3`;
 
@@ -662,54 +672,24 @@
 						}
 
 						const postId = post.id.split('_')[1]; // Extract the post ID
-						const postItem = document.createElement('li');
+						const postItem = document.createElement('li'); 
 						postItem.innerHTML = `
-							<div class="fb-post" data-href="https://www.facebook.com/${pageId}/posts/${postId}" data-width="500"></div>
+							<div class="fb-post"
+							data-href="https://www.facebook.com/${pageId}/posts/${postId}"
+							data-width="500"></div>
 						`;
 						console.log('Generated HTML for post:', postItem.innerHTML);
 						postsContainer.appendChild(postItem);
 					});
 
-					// Parse the newly added posts
-					console.log('Parsing Facebook posts for embedding');
-					FB.XFBML.parse(postsContainer, function() {
-						console.log('FB.XFBML.parse callback executed');
-						// Force re-render of posts
-						const fbPosts = document.querySelectorAll('.fb-post');
-						fbPosts.forEach(post => {
-							console.log('Re-rendering post:', post);
-							FB.XFBML.parse(post);
-						});
-					});
+					// Reparse the Facebook posts to render them
+					FB.XFBML.parse();
 				})
 				.catch(error => console.error('Error fetching Facebook posts:', error));
 		}
 
-		window.fbAsyncInit = function() {
-			console.log('Initializing Facebook SDK');
-			FB.init({
-				appId            : '1020011486259158',
-				autoLogAppEvents : true,
-				xfbml            : true,
-				version          : 'v11.0'
-			});
-		  
-			console.log('Facebook SDK initialized, fetching posts');
-			fetchFacebookPosts();
-		};
-
-		console.log('Loading Facebook SDK');
-		(function(d, s, id){
-			var js, fjs = d.getElementsByTagName(s)[0];
-			if (d.getElementById(id)) {
-				console.log('Facebook SDK already loaded');
-				return;
-			}
-			js = d.createElement(s); js.id = id;
-			js.src = "https://connect.facebook.net/en_US/sdk.js";
-			fjs.parentNode.insertBefore(js, fjs);
-			console.log('Facebook SDK script added to document');
-		}(document, 'script', 'facebook-jssdk'));
+		// Call the function to fetch posts when the page loads
+		window.addEventListener('load', fetchFacebookPosts);
 	</script>
 
 	<style>
