@@ -644,7 +644,10 @@
 			const url = `https://graph.facebook.com/${pageId}/posts?access_token=${accessToken}&limit=3`;
 
 			fetch(url)
-				.then(response => response.json())
+				.then(response => {
+					console.log('Received response from Facebook API');
+					return response.json();
+				})
 				.then(data => {
 					console.log('Facebook API Response:', data);
 					const posts = data.data;
@@ -652,7 +655,9 @@
 					postsContainer.innerHTML = ''; 
 
 					posts.forEach(post => {
+						console.log('Processing post:', post);
 						if (post.story && post.story.includes('created an event')) {
+							console.log('Skipping event post:', post);
 							return; // Skip event posts
 						}
 
@@ -661,11 +666,21 @@
 						postItem.innerHTML = `
 							<div class="fb-post" data-href="https://www.facebook.com/${pageId}/posts/${postId}" data-width="500"></div>
 						`;
+						console.log('Generated HTML for post:', postItem.innerHTML);
 						postsContainer.appendChild(postItem);
 					});
 
 					// Parse the newly added posts
-					FB.XFBML.parse(postsContainer);
+					console.log('Parsing Facebook posts for embedding');
+					FB.XFBML.parse(postsContainer, function() {
+						console.log('FB.XFBML.parse callback executed');
+						// Force re-render of posts
+						const fbPosts = document.querySelectorAll('.fb-post');
+						fbPosts.forEach(post => {
+							console.log('Re-rendering post:', post);
+							FB.XFBML.parse(post);
+						});
+					});
 				})
 				.catch(error => console.error('Error fetching Facebook posts:', error));
 		}
